@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pancake Clone - Tối giản</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body { font-family: 'Lexend', sans-serif; }
+        .pancake-blue { color: #2563EB; }
+        .bg-pancake-blue { background-color: #2563EB; }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-[#1E293B]">
+
+    <nav class="flex items-center justify-between px-6 md:px-20 py-5 bg-white shadow-sm">
+        <div class="flex items-center gap-3">
+            <img src="https://pancake.vn/images/logo.png" alt="Pancake Logo" class="h-10">
+        </div>
+        
+        <div class="hidden md:flex space-x-10 font-medium text-slate-600">
+            <a href="#" class="hover:text-blue-600 transition">Sản phẩm</a>
+            <a href="#" class="hover:text-blue-600 transition">Giải pháp</a>
+            <a href="#" class="hover:text-blue-600 transition">Bảng giá</a>
+        </div>
+
+        <button class="bg-pancake-blue text-white px-8 py-2.5 rounded-full font-bold hover:opacity-90 transition shadow-lg shadow-blue-100">
+            Đăng nhập
+        </button>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 pt-16 pb-24 text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-8">
+            Giải pháp quản lý <br/>
+            <span class="pancake-blue">hội thoại thông minh</span>
+        </h1>
+        
+        <p class="text-lg text-slate-500 max-w-2xl mx-auto mb-12">
+            Tối ưu hóa quy trình chăm sóc khách hàng và bán hàng trên nền tảng số. <br class="hidden md:block"> 
+            Đơn giản, mạnh mẽ và hiệu quả tuyệt đối.
+        </p>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-5">
+          <button class="bg-pancake-blue text-white px-10 py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all active:scale-95">
+            Bắt đầu miễn phí
+          </button>
+          <button class="bg-white text-slate-700 border border-slate-200 px-10 py-4 rounded-xl font-bold text-lg hover:bg-slate-50 transition-all">
+            Tìm hiểu thêm
+          </button>
+        </div>
+
+        <div class="mt-20 relative">
+            <div class="absolute -inset-4 bg-blue-100/30 blur-3xl rounded-full"></div>
+            <img src="https://pancake.vn/images/banner-home.png" 
+                 alt="Pancake Mockup" 
+                 class="relative rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white w-full max-w-5xl mx-auto">
+        </div>
+    </main>
+
+</body>
+</html>
